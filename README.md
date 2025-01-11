@@ -20,7 +20,7 @@ A simple project for testing the various aspects of OpenCL.
 - Rotate 90 CW
 - Halftoning
 - Particles Simulation
-  ![particle_sim](/OutputExamples/Particles_Sim.gif)
+![particle_sim](/OutputExamples/Particles_Sim.gif)
 
 
 ## **Getting Started**
