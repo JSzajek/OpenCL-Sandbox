@@ -55,6 +55,7 @@ group ""
 	include "Halftoning"
 	include "ParticlesSim"
 	include "NBodySim"
+	include "BoidsSim"
 group ""
 
 

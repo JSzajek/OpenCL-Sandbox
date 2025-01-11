@@ -48,7 +48,7 @@ public:
 	{
 	}
 public:
-	inline float Length() { return std::sqrt(x * x + y * y); }
+	inline float Length() const { return std::sqrt(x * x + y * y); }
 public:
 	float x = 0;
 	float y = 0;
@@ -73,7 +73,7 @@ bool InitializeDeviceAndContext()
 bool InitializeProgram()
 {
 	/* Build program */
-	program = OpenCLUtils::build_program(context, device, "shaders/nbody.cl");
+	program = OpenCLUtils::build_program(context, device, "shaders/boids.cl");
 	if (!program)
 		return false;
 
@@ -96,21 +96,14 @@ bool InitializeProgram()
 
 int main()
 {
-	constexpr size_t Num_Bodies = 50;
+	constexpr size_t Num_Boids = 75;
 
-	const cv::Scalar BackgroundColor(57, 36, 36);
-	const cv::Scalar BodyColor(204, 232, 169);
-	const cv::Scalar LineColor(205, 44, 44);
+	const cv::Scalar BackgroundColor(122, 46, 64);
+	const cv::Scalar BodyColor(245, 112, 75);
+	const cv::Scalar LineColor(236, 194, 61);
 	const int LineThickness = 2;
 
-	const float MinRadius = 5;
-	const float MaxRadius = 35;
-
-	const float MinMass = 5;
-	const float MaxMass = 100;
-
-	const float GravitationConstant = 0.3;
-	const float BounceFactor = 0.1f;
+	const int BoidSize = 10;
 
 	const size_t MaxX = 512;
 	const float HalfMaxX = MaxX * 0.5f;
@@ -123,25 +116,23 @@ int main()
 	Bounds.z = 0;			// MinY
 	Bounds.w = MaxY;		// MaxY
 
-	std::vector<Vector2f> Positions(Num_Bodies);
-	std::vector<Vector2f> Velocities(Num_Bodies);
-	std::vector<Vector2f> Accelerations(Num_Bodies);
-	std::vector<float> Radii(Num_Bodies);
-	std::vector<float> Masses(Num_Bodies);
+	std::vector<Vector2f> Positions(Num_Boids);
+	std::vector<Vector2f> Velocities(Num_Boids);
+	std::vector<Vector2f> Accelerations(Num_Boids);
 
-	const auto GetRandFloat = [](size_t Max)
-	{
-		return static_cast<float>(rand() % MaxX);
-	};
+	const float Seperation_Radius = 5;
+	const float Alignment_Radius = 95;
+	const float Cohesion_Radius = 5;
+
+	const float Max_Speed = 15;
+	const float Max_Force = 0.5f;
+	const float Bounce_Factor = 0.1f;
 
 	// Initialize particles
-	for (int i = 0; i < Num_Bodies; i++)
+	for (int i = 0; i < Num_Boids; i++)
 	{
 		Positions[i]	= Vector2f(RandUtils::RandomRange<size_t>(0, MaxX),
 								   RandUtils::RandomRange<size_t>(0, MaxY));
-
-		Radii[i] = RandUtils::RandomRange<float>(MinRadius, MaxRadius);
-		Masses[i] = RandUtils::RandomRange<float>(MinMass, MaxMass);
 	}
 
 	if (!InitializeDeviceAndContext())
@@ -150,34 +141,31 @@ int main()
     if (!InitializeProgram())
         return -1;
 
-	size_t float2BufferDataSize = Num_Bodies * sizeof(Vector2f);
+	size_t float2BufferDataSize = Num_Boids * sizeof(Vector2f);
 	cl_mem positionsBuffer = OpenCLUtils::create_input_buffer(context, Positions.data(), float2BufferDataSize);
 	cl_mem velocitiesBuffer = OpenCLUtils::create_input_buffer(context, Velocities.data(), float2BufferDataSize);
 	cl_mem accelerationsBuffer = OpenCLUtils::create_input_buffer(context, Accelerations.data(), float2BufferDataSize);
-
-	size_t floatBufferDataSize = Num_Bodies * sizeof(float);
-	cl_mem radiiBuffer = OpenCLUtils::create_input_buffer(context, Radii.data(), floatBufferDataSize);
-	cl_mem massesBuffer = OpenCLUtils::create_input_buffer(context, Masses.data(), floatBufferDataSize);
 
 	/* Create kernel arguments */
 	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &positionsBuffer);
 	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &velocitiesBuffer);
 	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &accelerationsBuffer);
-	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &radiiBuffer);
-	err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &massesBuffer);
-	err |= clSetKernelArg(kernel, 6, sizeof(int), &Num_Bodies);
-	err |= clSetKernelArg(kernel, 7, sizeof(float), &GravitationConstant);
-	err |= clSetKernelArg(kernel, 8, sizeof(float), &BounceFactor);
-	err |= clSetKernelArg(kernel, 9, sizeof(Vector4f), &Bounds);
+	err |= clSetKernelArg(kernel, 4, sizeof(float), &Seperation_Radius);
+	err |= clSetKernelArg(kernel, 5, sizeof(float), &Alignment_Radius);
+	err |= clSetKernelArg(kernel, 6, sizeof(float), &Cohesion_Radius);
+	err |= clSetKernelArg(kernel, 7, sizeof(float), &Max_Speed);
+	err |= clSetKernelArg(kernel, 8, sizeof(float), &Max_Force);
+	err |= clSetKernelArg(kernel, 9, sizeof(float), &Bounce_Factor);
+	err |= clSetKernelArg(kernel, 10, sizeof(Vector4f), &Bounds);
 	if (err < 0)
 	{
 		perror("Couldn't create a kernel argument");
 		return false;
 	}
 
-	size_t global = Num_Bodies;
+	size_t global = Num_Boids;
 
-	const std::string winName = "NBody Simulation";
+	const std::string winName = "Boids Simulation";
 	cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
 	cv::Mat outputImg(MaxY, MaxX, CV_8UC4, BackgroundColor);
 
@@ -191,7 +179,7 @@ int main()
 		gpuBufferReadTimer.Start();
 
 		// Update delta time --------------------------------------------------
-		err = clSetKernelArg(kernel, 5, sizeof(float), &deltaTime_s);
+		err = clSetKernelArg(kernel, 3, sizeof(float), &deltaTime_s);
 		if (err < 0)
 		{
 			perror("Couldn't create a kernel argument");
@@ -249,13 +237,12 @@ int main()
 		drawTimer.Start();
 		{
 			outputImg.setTo(BackgroundColor);
-			for (size_t x = 0; x < Num_Bodies; ++x)
+			for (size_t x = 0; x < Num_Boids; ++x)
 			{
 				const Vector2f position = Positions[x];
-				const float radius = Radii[x];
 				cv::circle(outputImg, 
 						   cv::Point(position.x, position.y),
-						   static_cast<int>(radius), 
+						   static_cast<int>(BoidSize),
 						   BodyColor,
 						   LineThickness, 
 						   cv::LineTypes::FILLED);
