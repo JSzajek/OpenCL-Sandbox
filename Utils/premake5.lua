@@ -31,6 +31,7 @@ project "Utils"
 	}
 
 	LinkOpenCL()
+	LinkOpenCV4()
 	
 	filter "system:windows"
 		systemversion "latest"
