@@ -148,8 +148,8 @@ bool InitializeProgram()
 int main()
 {
 	KernelType kernelType = KernelType::KernelType_Sobel;
-	const int quantization_levels = 32;
-	const float edge_threshold = 100.0f;
+	const int quantization_levels = 16;
+	const float edge_threshold = 150.0f;
 
 	if (!InitializeDeviceAndContext())
         return -1;

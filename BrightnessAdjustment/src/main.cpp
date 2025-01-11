@@ -136,7 +136,7 @@ int main()
 
 	cv::Mat outputImg(inputImg.rows, inputImg.cols, inputImg.type(), cv::Scalar(0, 0, 0));
 
-	const float factor = 0.5f;
+	const float factor = 1.25f;
     if (!AdjustBrightness(inputImg, factor, outputImg))
         return -1;
 
