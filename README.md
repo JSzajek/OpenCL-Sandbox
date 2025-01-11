@@ -5,21 +5,37 @@ A simple project for testing the various aspects of OpenCL.
 - Vector Addition
 - Matrix Multiplication
 - Grayscale Image
-![grayscale](/OutputExamples/Grayscale_Image.png)
+
+<img src="/OutputExamples/Grayscale_Image.png" alt="Grayscale" width="500"/>
+
 - Negative Image
+
 - Bilateral Filtering
+
 - Brightness Adjustment
+
 - Canny Edge Detection
+
 - Sobel Edge Detection
+
 - Sepia Tone
+
 - Cartoonization
+
 - Gaussian Blur
+
 - Histogram Equalization
+
 - Image Thresholding
+
 - Oil Painting
+
 - Rotate 90 CW
+
 - Halftoning
+
 - Particles Simulation
+
 ![particle_sim](/OutputExamples/Particles_Sim.gif)
 
 
