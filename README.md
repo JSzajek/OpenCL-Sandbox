@@ -60,9 +60,13 @@ A simple project for testing the various aspects of OpenCL.
 
 <img src="/OutputExamples/Halftoning.png" alt="Halftoning" width="512"/>
 
-- N-Body Simulation
+- Particles Simulation
 
 <img src="/OutputExamples/Particles_Sim.gif" alt="Particles Sim" width="256"/>
+
+- N-Body Simulation
+
+<img src="/OutputExamples/NBodies_Sim.gif" alt="Particles Sim" width="256"/>
 
 - Boids Simulation
 
