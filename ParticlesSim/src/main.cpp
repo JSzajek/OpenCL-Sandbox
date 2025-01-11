@@ -40,18 +40,6 @@ public:
 	float y = 0;
 };
 
-bool EdgeDetect(std::vector<float>& Positions,
-				std::vector<float>& Velocities,
-				float DeltaTime,
-				Vector2f Gravity,
-				Vector4f Bounds,
-				float BounceFactor,
-                cv::Mat& output)
-{
-	
-    return true;
-}
-
 bool InitializeDeviceAndContext()
 {
 	device = OpenCLUtils::create_device();
@@ -97,10 +85,11 @@ int main()
 	constexpr size_t Num_Particles = 1000;
 
 	const size_t ParticleRadius = 2;
+	const float StartVelocityMagnitude = 1;
 
-	float DeltaTime = 0.01f;
+	float DeltaTime = 0.033f;
 	Vector2f Gravity(0, 9.8f);
-	float BounceFactor = 1.2f;
+	float BounceFactor = 0.9f;
 
 	const size_t MaxX = 512;
 	const float HalfMaxX = MaxX * 0.5f;
@@ -121,8 +110,8 @@ int main()
 	{
 		Positions[i]	= Vector2f(rand() % MaxX, 
 								   rand() % MaxY);
-		Velocities[i]	= Vector2f((rand() % MaxX - HalfMaxX) / HalfMaxX, 
-								   (rand() % MaxY - HalfMaxY) / HalfMaxY);
+		Velocities[i]	= Vector2f((rand() % MaxX - HalfMaxX) / HalfMaxX * StartVelocityMagnitude,
+								   (rand() % MaxY - HalfMaxY) / HalfMaxY * StartVelocityMagnitude);
 	}
 
 	if (!InitializeDeviceAndContext())
@@ -158,10 +147,22 @@ int main()
 
 	Timer gpuBufferReadTimer;
 	Timer drawTimer;
+	auto previousTime = std::chrono::high_resolution_clock::now();
 
+	float deltaTime_s = 0;
 	while (true)
 	{
 		gpuBufferReadTimer.Start();
+
+		// Update delta time --------------------------------------------------
+		err = clSetKernelArg(kernel, 2, sizeof(float), &deltaTime_s);
+		if (err < 0)
+		{
+			perror("Couldn't create a kernel argument");
+			return false;
+		}
+		// --------------------------------------------------------------------
+
 		err = clEnqueueNDRangeKernel(queue,
 									 kernel,
 									 1,
@@ -181,7 +182,7 @@ int main()
 		/* Read the kernel's output    */
 		err = clEnqueueReadBuffer(queue,
 								  positionsBuffer,
-								  CL_TRUE,
+								  CL_TRUE, // Blocking read
 								  0,
 								  bufferDataSize,
 								  Positions.data(),
@@ -199,8 +200,6 @@ int main()
 		drawTimer.Start();
 		{
 			outputImg.setTo(cv::Scalar(0, 0, 0));
-			//std::cout << "Particle [0]: (" << std::to_string(Positions[0].x) << ", " << std::to_string(Positions[0].y) << ")" << std::endl;
-
 			for (size_t x = 0; x < Num_Particles; ++x)
 			{
 				cv::circle(outputImg, cv::Point(Positions[x].x, Positions[x].y), ParticleRadius, cv::Scalar(255, 0, 0), 1, -1);
@@ -218,6 +217,7 @@ int main()
 		const double drawTime_ms = drawTimer.Elapsed_ms();
 
 		std::cout << "GPU Read Time: " << std::to_string(gpuBufferTime_ms) << "\tDraw Time: " << std::to_string(drawTime_ms) << std::endl;
+		deltaTime_s = (gpuBufferTime_ms + drawTime_ms) * 0.01f; // Convert back to seconds
 	}
 
 	cv::destroyWindow(winName);
