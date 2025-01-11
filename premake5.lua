@@ -53,6 +53,7 @@ group ""
 	include "OilPainting"
 	include "Cartoonization"
 	include "Halftoning"
+	include "ParticlesSim"
 group ""
 
 
