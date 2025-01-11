@@ -10,59 +10,63 @@ A simple project for testing the various aspects of OpenCL.
 
 - Negative Image
 
-<img src="/OutputExamples/Negative_Image.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Negative_Image.png" alt="Negative" width="512"/>
 
 - Bilateral Filtering
 
-<img src="/OutputExamples/Bilateral_Filtering.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Bilateral_Filtering.png" alt="Bilateral Filtering" width="512"/>
 
 - Brightness Adjustment
 
-<img src="/OutputExamples/Brightness_Adjustment.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Brightness_Adjustment.png" alt="Brightness Adjustment" width="512"/>
 
 - Canny Edge Detection
 
-<img src="/OutputExamples/Canny_Edge_Detection.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Canny_Edge_Detection.png" alt="Canny Edge" width="512"/>
 
 - Sobel Edge Detection
 
-<img src="/OutputExamples/Sobel_Edge_Detection.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Sobel_Edge_Detection.png" alt="Sobel Edge" width="512"/>
 
 - Sepia Tone
 
-<img src="/OutputExamples/Sepia_Tone.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Sepia_Tone.png" alt="Sepia Tone" width="512"/>
 
 - Cartoonization
 
-<img src="/OutputExamples/Cartoonization.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Cartoonization.png" alt="Cartoonization" width="512"/>
 
 - Gaussian Blur
 
-<img src="/OutputExamples/Gaussian_Blur.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Gaussian_Blur.png" alt="Gaussian Blur" width="512"/>
 
 - Histogram Equalization
 
-<img src="/OutputExamples/Histogram_Equalization.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Histogram_Equalization.png" alt="Histogram Equalization" width="512"/>
 
 - Image Thresholding
 
-<img src="/OutputExamples/Image_Thresholding.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Image_Thresholding.png" alt="Image Thresholding" width="512"/>
 
 - Oil Painting
 
-<img src="/OutputExamples/Oil_Painting.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Oil_Painting.png" alt="Oil Painting" width="512"/>
 
 - Rotate 90 CW
 
-<img src="/OutputExamples/Rotate_90CW.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Rotate_90CW.png" alt="Rotate 90CW" width="512"/>
 
 - Halftoning
 
-<img src="/OutputExamples/Halftoning.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Halftoning.png" alt="Halftoning" width="512"/>
 
 - Particles Simulation
 
-<img src="/OutputExamples/Particles_Sim.gif" alt="Grayscale" width="256"/>
+<img src="/OutputExamples/Particles_Sim.gif" alt="Particles Sim" width="256"/>
+
+- Particles Simulation
+
+<img src="/OutputExamples/NBodies_Sim.gif" alt="NBody Sim" width="256"/>
 
 
 ## **Getting Started**

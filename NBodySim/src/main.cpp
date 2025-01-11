@@ -1,5 +1,6 @@
 #include "OpenCLUtils.h"
 #include "OpenCVUtils.h"
+#include "RandomUtils.h"
 #include "Timer.h"
 
 #include "opencv2/opencv.hpp"
@@ -19,6 +20,17 @@ cl_int err = -1;
 struct Vector4f
 {
 public:
+	Vector4f() = default;
+
+	Vector4f(float _x, float _y, float _z, float _w)
+		: x(_x),
+		y(_y),
+		z(_z),
+		w(_w)
+	{
+	}
+
+public:
 	float x = 0;
 	float y = 0;
 	float z = 0;
@@ -31,10 +43,12 @@ public:
 	Vector2f() = default;
 
 	Vector2f(float _x, float _y)
-		: x(_x), 
+		: x(_x),
 		y(_y)
 	{
 	}
+public:
+	inline float Length() { return std::sqrt(x * x + y * y); }
 public:
 	float x = 0;
 	float y = 0;
@@ -59,7 +73,7 @@ bool InitializeDeviceAndContext()
 bool InitializeProgram()
 {
 	/* Build program */
-	program = OpenCLUtils::build_program(context, device, "shaders/particles.cl");
+	program = OpenCLUtils::build_program(context, device, "shaders/nbody.cl");
 	if (!program)
 		return false;
 
@@ -82,17 +96,21 @@ bool InitializeProgram()
 
 int main()
 {
-	constexpr size_t Num_Particles = 1000;
+	constexpr size_t Num_Particles = 50;
 
-	const size_t ParticleRadius = 5;
-	const cv::Scalar BackgroundColor(49, 40, 34);
-	const cv::Scalar LineColor(5, 131, 236);
+	const cv::Scalar BackgroundColor(57, 36, 36);
+	const cv::Scalar BodyColor(204, 232, 169);
+	const cv::Scalar LineColor(205, 44, 44);
 	const int LineThickness = 2;
 
-	const float StartVelocityMagnitude = 1;
+	const float MinRadius = 5;
+	const float MaxRadius = 35;
 
-	Vector2f Gravity(0, 9.8f);
-	float BounceFactor = 0.95f;
+	const float MinMass = 5;
+	const float MaxMass = 100;
+
+	const float GravitationConstant = 0.3;
+	const float BounceFactor = 0.1f;
 
 	const size_t MaxX = 512;
 	const float HalfMaxX = MaxX * 0.5f;
@@ -107,14 +125,23 @@ int main()
 
 	std::vector<Vector2f> Positions(Num_Particles);
 	std::vector<Vector2f> Velocities(Num_Particles);
+	std::vector<Vector2f> Accelerations(Num_Particles);
+	std::vector<float> Radii(Num_Particles);
+	std::vector<float> Masses(Num_Particles);
+
+	const auto GetRandFloat = [](size_t Max)
+	{
+		return static_cast<float>(rand() % MaxX);
+	};
 
 	// Initialize particles
 	for (int i = 0; i < Num_Particles; i++)
 	{
-		Positions[i]	= Vector2f(rand() % MaxX, 
-								   rand() % MaxY);
-		Velocities[i]	= Vector2f((rand() % MaxX - HalfMaxX) / HalfMaxX * StartVelocityMagnitude,
-								   (rand() % MaxY - HalfMaxY) / HalfMaxY * StartVelocityMagnitude);
+		Positions[i]	= Vector2f(RandUtils::RandomRange<size_t>(0, MaxX),
+								   RandUtils::RandomRange<size_t>(0, MaxY));
+
+		Radii[i] = RandUtils::RandomRange<float>(MinRadius, MaxRadius);
+		Masses[i] = RandUtils::RandomRange<float>(MinMass, MaxMass);
 	}
 
 	if (!InitializeDeviceAndContext())
@@ -123,18 +150,25 @@ int main()
     if (!InitializeProgram())
         return -1;
 
+	size_t float2BufferDataSize = Num_Particles * sizeof(Vector2f);
+	cl_mem positionsBuffer = OpenCLUtils::create_input_buffer(context, Positions.data(), float2BufferDataSize);
+	cl_mem velocitiesBuffer = OpenCLUtils::create_input_buffer(context, Velocities.data(), float2BufferDataSize);
+	cl_mem accelerationsBuffer = OpenCLUtils::create_input_buffer(context, Accelerations.data(), float2BufferDataSize);
 
-	const size_t bufferDataSize = Num_Particles * sizeof(Vector2f);
-
-	cl_mem positionsBuffer = OpenCLUtils::create_input_buffer(context, Positions.data(), bufferDataSize);
-	cl_mem velocitiesBuffer = OpenCLUtils::create_input_buffer(context, Velocities.data(), bufferDataSize);
+	size_t floatBufferDataSize = Num_Particles * sizeof(float);
+	cl_mem radiiBuffer = OpenCLUtils::create_input_buffer(context, Radii.data(), floatBufferDataSize);
+	cl_mem massesBuffer = OpenCLUtils::create_input_buffer(context, Masses.data(), floatBufferDataSize);
 
 	/* Create kernel arguments */
 	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &positionsBuffer);
-	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &velocitiesBuffer);
-	err |= clSetKernelArg(kernel, 3, sizeof(Vector2f), &Gravity);
-	err |= clSetKernelArg(kernel, 4, sizeof(Vector4f), &Bounds);
-	err |= clSetKernelArg(kernel, 5, sizeof(float), &BounceFactor);
+	err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &velocitiesBuffer);
+	err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &accelerationsBuffer);
+	err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &radiiBuffer);
+	err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &massesBuffer);
+	err |= clSetKernelArg(kernel, 6, sizeof(int), &Num_Particles);
+	err |= clSetKernelArg(kernel, 7, sizeof(float), &GravitationConstant);
+	err |= clSetKernelArg(kernel, 8, sizeof(float), &BounceFactor);
+	err |= clSetKernelArg(kernel, 9, sizeof(Vector4f), &Bounds);
 	if (err < 0)
 	{
 		perror("Couldn't create a kernel argument");
@@ -143,7 +177,7 @@ int main()
 
 	size_t global = Num_Particles;
 
-	const std::string winName = "Particles Simulation";
+	const std::string winName = "NBody Simulation";
 	cv::namedWindow(winName, cv::WINDOW_AUTOSIZE);
 	cv::Mat outputImg(MaxY, MaxX, CV_8UC4, BackgroundColor);
 
@@ -157,7 +191,7 @@ int main()
 		gpuBufferReadTimer.Start();
 
 		// Update delta time --------------------------------------------------
-		err = clSetKernelArg(kernel, 2, sizeof(float), &deltaTime_s);
+		err = clSetKernelArg(kernel, 5, sizeof(float), &deltaTime_s);
 		if (err < 0)
 		{
 			perror("Couldn't create a kernel argument");
@@ -184,18 +218,31 @@ int main()
 		/* Read the kernel's output    */
 		err = clEnqueueReadBuffer(queue,
 								  positionsBuffer,
-								  CL_TRUE, // Blocking read
+								  CL_FALSE,
 								  0,
-								  bufferDataSize,
+								  float2BufferDataSize,
 								  Positions.data(),
 								  0,
 								  NULL,
 								  NULL);
+
+		err |= clEnqueueReadBuffer(queue,
+								   velocitiesBuffer,
+								   CL_FALSE,
+								   0,
+								   float2BufferDataSize,
+								   Velocities.data(),
+								   0,
+								   NULL,
+								   NULL);
 		if (err < 0)
 		{
 			perror("Couldn't read the buffer");
 			return false;
 		}
+
+		clFinish(queue);
+
 		const double gpuBufferTime_ms = gpuBufferReadTimer.Elapsed_ms();
 
 		// Visualization logic
@@ -204,12 +251,22 @@ int main()
 			outputImg.setTo(BackgroundColor);
 			for (size_t x = 0; x < Num_Particles; ++x)
 			{
+				const Vector2f position = Positions[x];
+				const float radius = Radii[x];
 				cv::circle(outputImg, 
-						   cv::Point(Positions[x].x, Positions[x].y), 
-						   ParticleRadius, 
-						   LineColor, 
+						   cv::Point(position.x, position.y),
+						   static_cast<int>(radius), 
+						   BodyColor,
 						   LineThickness, 
 						   cv::LineTypes::FILLED);
+
+				Vector2f velocity = Velocities[x];
+				const float speed = velocity.Length();
+				cv::line(outputImg, 
+						 cv::Point(position.x, position.y),
+						 cv::Point(position.x + velocity.x, position.y + velocity.y),
+						 LineColor * speed,
+						 LineThickness);
 			}
 
 			cv::imshow(winName, outputImg);

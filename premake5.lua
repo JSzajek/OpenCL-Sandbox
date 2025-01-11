@@ -54,6 +54,7 @@ group ""
 	include "Cartoonization"
 	include "Halftoning"
 	include "ParticlesSim"
+	include "NBodySim"
 group ""
 
 
