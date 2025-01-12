@@ -171,7 +171,6 @@ int main()
 
 	Timer gpuBufferReadTimer;
 	Timer drawTimer;
-	auto previousTime = std::chrono::high_resolution_clock::now();
 
 	float deltaTime_s = 0.01f;
 	while (true)

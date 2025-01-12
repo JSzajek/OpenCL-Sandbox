@@ -56,6 +56,7 @@ group ""
 	include "ParticlesSim"
 	include "NBodySim"
 	include "BoidsSim"
+	include "ErosionSim"
 group ""
 
 
