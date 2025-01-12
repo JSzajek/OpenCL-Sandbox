@@ -24,24 +24,34 @@ Run Win-GenerateProjects.bat
 ##### **Windows**
 Open the generated .sln file and build the project.
 
-## **Examples**
+## **Simple Examples**
 - Vector Addition
 - Matrix Multiplication
 - Grayscale Image
 
-<img src="/OutputExamples/Grayscale_Image.png" alt="Grayscale" width="512"/>
+<img src="/OutputExamples/Grayscale_Image.png" alt="Grayscale" width="256"/>
 
 - Negative Image
 
-<img src="/OutputExamples/Negative_Image.png" alt="Negative" width="512"/>
-
-- Bilateral Filtering
-
-<img src="/OutputExamples/Bilateral_Filtering.png" alt="Bilateral Filtering" width="512"/>
+<img src="/OutputExamples/Negative_Image.png" alt="Negative" width="256"/>
 
 - Brightness Adjustment
 
-<img src="/OutputExamples/Brightness_Adjustment.png" alt="Brightness Adjustment" width="512"/>
+<img src="/OutputExamples/Brightness_Adjustment.png" alt="Brightness Adjustment" width="256"/>
+
+- Sepia Tone
+
+<img src="/OutputExamples/Sepia_Tone.png" alt="Sepia Tone" width="256"/>
+
+- Histogram Equalization
+
+<img src="/OutputExamples/Histogram_Equalization.png" alt="Histogram Equalization" width="256"/>
+
+- Rotate 90 CW
+
+<img src="/OutputExamples/Rotate_90CW.png" alt="Rotate 90CW" width="256"/>
+
+## **Complex Examples**
 
 - Canny Edge Detection
 
@@ -51,10 +61,6 @@ Open the generated .sln file and build the project.
 
 <img src="/OutputExamples/Sobel_Edge_Detection.png" alt="Sobel Edge" width="512"/>
 
-- Sepia Tone
-
-<img src="/OutputExamples/Sepia_Tone.png" alt="Sepia Tone" width="512"/>
-
 - Cartoonization
 
 <img src="/OutputExamples/Cartoonization.png" alt="Cartoonization" width="512"/>
@@ -63,9 +69,9 @@ Open the generated .sln file and build the project.
 
 <img src="/OutputExamples/Gaussian_Blur.png" alt="Gaussian Blur" width="512"/>
 
-- Histogram Equalization
+- Bilateral Filtering
 
-<img src="/OutputExamples/Histogram_Equalization.png" alt="Histogram Equalization" width="512"/>
+<img src="/OutputExamples/Bilateral_Filtering.png" alt="Bilateral Filtering" width="512"/>
 
 - Image Thresholding
 
@@ -74,10 +80,6 @@ Open the generated .sln file and build the project.
 - Oil Painting
 
 <img src="/OutputExamples/Oil_Painting.png" alt="Oil Painting" width="512"/>
-
-- Rotate 90 CW
-
-<img src="/OutputExamples/Rotate_90CW.png" alt="Rotate 90CW" width="512"/>
 
 - Halftoning
 
