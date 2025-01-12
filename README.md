@@ -55,35 +55,35 @@ Open the generated .sln file and build the project.
 
 - Canny Edge Detection
 
-<img src="/OutputExamples/Canny_Edge_Detection.png" alt="Canny Edge" width="512"/>
+<img src="/OutputExamples/Canny_Edge_Detection.png" alt="Canny Edge" width="256"/>
 
 - Sobel Edge Detection
 
-<img src="/OutputExamples/Sobel_Edge_Detection.png" alt="Sobel Edge" width="512"/>
+<img src="/OutputExamples/Sobel_Edge_Detection.png" alt="Sobel Edge" width="256"/>
 
 - Cartoonization
 
-<img src="/OutputExamples/Cartoonization.png" alt="Cartoonization" width="512"/>
+<img src="/OutputExamples/Cartoonization.png" alt="Cartoonization" width="256"/>
 
 - Gaussian Blur
 
-<img src="/OutputExamples/Gaussian_Blur.png" alt="Gaussian Blur" width="512"/>
+<img src="/OutputExamples/Gaussian_Blur.png" alt="Gaussian Blur" width="256"/>
 
 - Bilateral Filtering
 
-<img src="/OutputExamples/Bilateral_Filtering.png" alt="Bilateral Filtering" width="512"/>
+<img src="/OutputExamples/Bilateral_Filtering.png" alt="Bilateral Filtering" width="256"/>
 
 - Image Thresholding
 
-<img src="/OutputExamples/Image_Thresholding.png" alt="Image Thresholding" width="512"/>
+<img src="/OutputExamples/Image_Thresholding.png" alt="Image Thresholding" width="256"/>
 
 - Oil Painting
 
-<img src="/OutputExamples/Oil_Painting.png" alt="Oil Painting" width="512"/>
+<img src="/OutputExamples/Oil_Painting.png" alt="Oil Painting" width="256"/>
 
 - Halftoning
 
-<img src="/OutputExamples/Halftoning.png" alt="Halftoning" width="512"/>
+<img src="/OutputExamples/Halftoning.png" alt="Halftoning" width="256"/>
 
 - Particles Simulation
 
